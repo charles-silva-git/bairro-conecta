@@ -1,0 +1,60 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /professionals/{professionalId} {
+      allow read: if true;
+      allow create: if isValidProfessionalCreate(request.resource.data);
+      allow update: if isValidProfessionalUpdate(request.resource.data, resource.data);
+      allow delete: if true;
+    }
+
+    function isValidProfessionalCreate(data) {
+      return hasExpectedKeys(data)
+        && hasValidTextFields(data)
+        && hasValidPhone(data.phone)
+        && data.createdAt == request.time
+        && data.updatedAt == request.time;
+    }
+
+    function isValidProfessionalUpdate(newData, existingData) {
+      return hasExpectedKeys(newData)
+        && hasValidTextFields(newData)
+        && hasValidPhone(newData.phone)
+        && newData.createdAt == existingData.createdAt
+        && newData.updatedAt == request.time;
+    }
+
+    function hasExpectedKeys(data) {
+      return data.keys().hasOnly([
+        'name',
+        'profession',
+        'phone',
+        'description',
+        'neighborhood',
+        'createdAt',
+        'updatedAt',
+      ]);
+    }
+
+    function hasValidTextFields(data) {
+      return data.name is string
+        && data.name.size() >= 3
+        && data.name.size() <= 80
+        && data.profession is string
+        && data.profession.size() >= 3
+        && data.profession.size() <= 60
+        && data.description is string
+        && data.description.size() >= 5
+        && data.description.size() <= 280
+        && data.neighborhood is string
+        && data.neighborhood.size() >= 2
+        && data.neighborhood.size() <= 60;
+    }
+
+    function hasValidPhone(phone) {
+      return phone is string
+        && phone.matches('^\\([0-9]{2}\\) [0-9]{4,5}-[0-9]{4}$');
+    }
+  }
+}
