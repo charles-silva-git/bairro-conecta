@@ -9,7 +9,7 @@ import {
 } from 'firebase/firestore';
 
 import { FIRESTORE_COLLECTIONS } from '../constants/firestore';
-import { db } from '../firebase/app';
+import { db, isFirebaseConfigured } from '../firebase/app';
 
 import {
   buildProfessionalPayload,
@@ -17,9 +17,18 @@ import {
 } from '../utils/professionalModel';
 
 /**
- * Retorna a referência da coleção "professionals"
+ * Retorna a referência da coleção de profissionais
  */
+function ensureFirebaseConfiguration() {
+  if (!isFirebaseConfigured || !db) {
+    throw new Error(
+      'Configure o Firebase em src/firebase/config.js antes de usar o Firestore.'
+    );
+  }
+}
+
 function getProfessionalsCollection() {
+  ensureFirebaseConfiguration();
   return collection(db, FIRESTORE_COLLECTIONS.PROFESSIONALS);
 }
 
@@ -51,7 +60,7 @@ export async function fetchProfessionals() {
 }
 
 /**
- * Cria novo profissional no Firestore
+ * Cria novo profissional
  */
 export async function createProfessionalInFirestore(formData) {
   const { id, ...professionalData } = buildProfessionalPayload(formData);
@@ -71,13 +80,22 @@ export async function createProfessionalInFirestore(formData) {
 /**
  * Atualiza profissional existente
  */
-export async function updateProfessionalInFirestore(professionalId, formData) {
+export async function updateProfessionalInFirestore(
+  professionalId,
+  formData
+) {
   const { id, ...professionalData } = buildProfessionalPayload(
     formData,
     professionalId
   );
 
-  await updateDoc(doc(getProfessionalsCollection(), professionalId), {
+  const professionalRef = doc(
+    db,
+    FIRESTORE_COLLECTIONS.PROFESSIONALS,
+    professionalId
+  );
+
+  await updateDoc(professionalRef, {
     name: professionalData.name,
     profession: professionalData.profession,
     phone: professionalData.phone,
@@ -96,5 +114,13 @@ export async function updateProfessionalInFirestore(professionalId, formData) {
  * Remove profissional
  */
 export async function deleteProfessionalFromFirestore(professionalId) {
-  await deleteDoc(doc(getProfessionalsCollection(), professionalId));
+  ensureFirebaseConfiguration();
+
+  const professionalRef = doc(
+    db,
+    FIRESTORE_COLLECTIONS.PROFESSIONALS,
+    professionalId
+  );
+
+  await deleteDoc(professionalRef);
 }

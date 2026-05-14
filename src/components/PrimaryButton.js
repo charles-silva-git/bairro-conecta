@@ -7,29 +7,40 @@ export default function PrimaryButton({
   variant = 'primary',
   disabled = false,
 }) {
-  const buttonStyles = [styles.button];
-  const textStyles = [styles.text];
+  function getButtonStyle() {
+    if (variant === 'secondary') {
+      return styles.secondaryButton;
+    }
 
-  if (variant === 'secondary') {
-    buttonStyles.push(styles.secondaryButton);
-    textStyles.push(styles.secondaryText);
+    if (variant === 'danger') {
+      return styles.dangerButton;
+    }
+
+    return styles.primaryButton;
   }
 
-  if (variant === 'danger') {
-    buttonStyles.push(styles.dangerButton);
+  function getTextStyle() {
+    if (variant === 'secondary') {
+      return styles.secondaryText;
+    }
+
+    return styles.primaryText;
   }
 
   return (
     <Pressable
-      disabled={disabled}
       onPress={onPress}
+      disabled={disabled}
       style={({ pressed }) => [
-        ...buttonStyles,
-        pressed && styles.buttonPressed,
-        disabled && styles.buttonDisabled,
+        styles.button,
+        getButtonStyle(),
+        pressed && styles.pressed,
+        disabled && styles.disabled,
       ]}
     >
-      <Text style={textStyles}>{title}</Text>
+      <Text style={[styles.text, getTextStyle()]}>
+        {title}
+      </Text>
     </Pressable>
   );
 }
@@ -37,33 +48,44 @@ export default function PrimaryButton({
 const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
-    backgroundColor: theme.colors.primary,
     borderRadius: theme.radius.md,
-    minHeight: 54,
     justifyContent: 'center',
-    paddingHorizontal: theme.spacing.md,
+    minHeight: 50,
+    paddingHorizontal: theme.spacing.lg,
   },
-  buttonPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.99 }],
+
+  primaryButton: {
+    backgroundColor: theme.colors.primary,
   },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
+
   secondaryButton: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.secondarySoft,
     borderWidth: 1,
+    borderColor: theme.colors.secondary,
   },
+
   dangerButton: {
-    backgroundColor: theme.colors.danger,
+    backgroundColor: '#DC2626',
   },
+
   text: {
-    color: theme.colors.surface,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
   },
+
+  primaryText: {
+    color: '#FFFFFF',
+  },
+
   secondaryText: {
-    color: theme.colors.text,
+    color: theme.colors.secondary,
+  },
+
+  pressed: {
+    opacity: 0.8,
+  },
+
+  disabled: {
+    opacity: 0.5,
   },
 });

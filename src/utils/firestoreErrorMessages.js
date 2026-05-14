@@ -11,5 +11,9 @@ const FIRESTORE_ERROR_MESSAGES = {
 export function getFirestoreErrorMessage(error, fallbackMessage) {
   const normalizedCode = error?.code?.replace('firestore/', '');
 
-  return FIRESTORE_ERROR_MESSAGES[normalizedCode] || fallbackMessage;
+  return (
+    FIRESTORE_ERROR_MESSAGES[normalizedCode] ||
+    error?.message ||
+    fallbackMessage
+  );
 }

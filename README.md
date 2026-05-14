@@ -139,7 +139,7 @@ Antes de iniciar, tenha instalado:
 1. Clone o repositorio:
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
+git clone https://github.com/charles-silva-git/bairro-conecta.git
 ```
 
 2. Entre na pasta do projeto:
@@ -176,7 +176,13 @@ Caso voce esteja configurando o projeto em outro ambiente, revise o arquivo:
 src/firebase/config.js
 ```
 
-Esse arquivo deve conter as credenciais do seu projeto Firebase Web.
+Esse arquivo e publicado com placeholders para evitar expor um Firebase real no repositório. Para executar o app com persistencia, preencha `src/firebase/config.js` com as credenciais do seu projeto Firebase Web.
+
+Como referencia, o projeto tambem possui:
+
+```text
+src/firebase/config.example.js
+```
 
 ## Como configurar o Firestore
 

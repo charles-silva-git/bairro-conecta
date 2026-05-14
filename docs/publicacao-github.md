@@ -129,7 +129,7 @@ git commit -m "docs: prepare GitHub publication and delivery guide"
 ### Conectar ao repositorio remoto
 
 ```bash
-git remote add origin <URL_DO_REPOSITORIO>
+git remote add origin https://github.com/charles-silva-git/bairro-conecta.git
 ```
 
 ### Enviar para o GitHub
