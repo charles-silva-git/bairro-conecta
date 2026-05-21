@@ -5,36 +5,56 @@ import { useProfessionals } from '../hooks/useProfessionals';
 import { theme } from '../styles/theme';
 
 export default function HomeScreen({ navigation }) {
-  const { professionals } = useProfessionals();
+  const { professionals, errorMessage, isLoading } = useProfessionals();
 
   return (
     <ScreenContainer style={styles.container}>
       <View style={styles.hero}>
-        <Text style={styles.badge}>Servicos locais</Text>
-        <Text style={styles.title}>Encontre profissionais do seu bairro.</Text>
+        <Text style={styles.badge}>Servicos locais e comunidade</Text>
+        <Text style={styles.title}>
+          Encontre profissionais do seu bairro com mais praticidade.
+        </Text>
         <Text style={styles.description}>
-          O BairroConecta aproxima moradores e trabalhadores autonomos com uma
-          experiencia simples e acessivel.
+          O BairroConecta ajuda moradores a encontrar servicos proximos e da
+          visibilidade a pequenos empreendedores locais.
         </Text>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Rede local em crescimento</Text>
-        <Text style={styles.cardText}>
-          O app ja possui fluxo local de cadastro, listagem, edicao e exclusao.
+      <View style={styles.infoCard}>
+        <Text style={styles.infoTitle}>Rede local em destaque</Text>
+        <Text style={styles.infoText}>
+          {errorMessage
+            ? 'O app ja esta preparado para o Firestore, mas ainda precisa da configuracao real do projeto Firebase.'
+            : 'Os dados agora sao carregados e persistidos no Firebase Firestore.'}
         </Text>
-        <Text style={styles.cardValue}>{professionals.length} profissionais</Text>
+        {errorMessage ? (
+          <Text style={styles.helperText}>{errorMessage}</Text>
+        ) : null}
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>
+              {isLoading ? '...' : professionals.length}
+            </Text>
+            <Text style={styles.statLabel}>Profissionais</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>5</Text>
+            <Text style={styles.statLabel}>Campos por cadastro</Text>
+          </View>
+        </View>
       </View>
 
       <View style={styles.actions}>
         <PrimaryButton
-          title="Ver profissionais"
+          title="Ver lista de profissionais"
           onPress={() => navigation.navigate('ProfessionalsList')}
         />
         <PrimaryButton
-          title="Novo cadastro"
+          title="Cadastrar novo profissional"
           variant="secondary"
-          onPress={() => navigation.navigate('ProfessionalForm')}
+          onPress={() =>
+            navigation.navigate('ProfessionalForm', { professionalId: null })
+          }
         />
       </View>
     </ScreenContainer>
@@ -43,7 +63,7 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    gap: theme.spacing.xl,
+    gap: theme.spacing.lg,
     justifyContent: 'center',
   },
   hero: {
@@ -56,6 +76,7 @@ const styles = StyleSheet.create({
     color: theme.colors.secondary,
     fontSize: 12,
     fontWeight: '700',
+    letterSpacing: 0.4,
     overflow: 'hidden',
     paddingHorizontal: theme.spacing.sm,
     paddingVertical: 6,
@@ -63,7 +84,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: theme.colors.text,
-    fontSize: 32,
+    fontSize: 31,
     fontWeight: '800',
     lineHeight: 40,
   },
@@ -72,31 +93,54 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
   },
-  actions: {
-    gap: theme.spacing.md,
-  },
-  card: {
+  infoCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
     borderRadius: theme.radius.lg,
     borderWidth: 1,
     gap: theme.spacing.xs,
     padding: theme.spacing.lg,
+    ...theme.shadow.card,
   },
-  cardTitle: {
+  infoTitle: {
     color: theme.colors.text,
     fontSize: 18,
     fontWeight: '700',
   },
-  cardText: {
+  infoText: {
     color: theme.colors.textMuted,
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: 15,
+    lineHeight: 23,
   },
-  cardValue: {
+  helperText: {
+    color: theme.colors.danger,
+    fontSize: 13,
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: theme.spacing.md,
+    marginTop: theme.spacing.md,
+  },
+  statCard: {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.radius.md,
+    flex: 1,
+    padding: theme.spacing.md,
+  },
+  statValue: {
     color: theme.colors.primary,
     fontSize: 24,
     fontWeight: '800',
-    marginTop: theme.spacing.sm,
+    marginBottom: 4,
+  },
+  statLabel: {
+    color: theme.colors.textMuted,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  actions: {
+    gap: theme.spacing.md,
   },
 });

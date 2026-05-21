@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import AppInput from '../components/AppInput';
 import PrimaryButton from '../components/PrimaryButton';
 import ScreenContainer from '../components/ScreenContainer';
@@ -10,13 +10,21 @@ import {
   formatPhoneValue,
   validateProfessionalForm,
 } from '../utils/professionalModel';
+import { getFirestoreErrorMessage } from '../utils/firestoreErrorMessages';
 
 export default function ProfessionalFormScreen({ navigation, route }) {
   const professionalId = route.params?.professionalId;
-  const { createProfessional, getProfessionalById, updateProfessional } =
-    useProfessionals();
+  const {
+    createProfessional,
+    getProfessionalById,
+    isLoading,
+    updateProfessional,
+  } = useProfessionals();
+
   const [form, setForm] = useState(createInitialProfessionalForm());
   const [errors, setErrors] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
+
   const isEditing = Boolean(professionalId);
 
   useLayoutEffect(() => {
@@ -31,9 +39,18 @@ export default function ProfessionalFormScreen({ navigation, route }) {
       return;
     }
 
+    if (isLoading) {
+      return;
+    }
+
     const selectedProfessional = getProfessionalById(professionalId);
 
     if (!selectedProfessional) {
+      Alert.alert(
+        'Cadastro nao encontrado',
+        'O profissional selecionado nao esta mais disponivel.'
+      );
+      navigation.goBack();
       return;
     }
 
@@ -44,7 +61,7 @@ export default function ProfessionalFormScreen({ navigation, route }) {
       description: selectedProfessional.description,
       neighborhood: selectedProfessional.neighborhood,
     });
-  }, [getProfessionalById, professionalId]);
+  }, [getProfessionalById, isLoading, navigation, professionalId]);
 
   function handleChange(field, value) {
     const nextValue = field === 'phone' ? formatPhoneValue(value) : value;
@@ -62,7 +79,7 @@ export default function ProfessionalFormScreen({ navigation, route }) {
     }
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const validationErrors = validateProfessionalForm(form);
 
     if (Object.keys(validationErrors).length > 0) {
@@ -70,24 +87,40 @@ export default function ProfessionalFormScreen({ navigation, route }) {
       return;
     }
 
-    if (isEditing) {
-      updateProfessional(professionalId, form);
-      Alert.alert('Sucesso', 'Cadastro atualizado com sucesso.');
-    } else {
-      createProfessional(form);
-      Alert.alert('Sucesso', 'Profissional cadastrado com sucesso.');
-    }
+    try {
+      setIsSaving(true);
 
-    navigation.navigate('ProfessionalsList');
+      if (isEditing) {
+        await updateProfessional(professionalId, form);
+        Alert.alert('Sucesso', 'Cadastro atualizado com sucesso.');
+      } else {
+        await createProfessional(form);
+        Alert.alert('Sucesso', 'Profissional cadastrado com sucesso.');
+      }
+
+      navigation.navigate('ProfessionalsList');
+    } catch (error) {
+      Alert.alert(
+        'Erro ao salvar',
+        getFirestoreErrorMessage(
+          error,
+          'Nao foi possivel salvar o cadastro no Firestore.'
+        )
+      );
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
     <ScreenContainer scrollable>
       <View style={styles.header}>
-        <Text style={styles.title}>Cadastro de profissional</Text>
+        <Text style={styles.title}>
+          {isEditing ? 'Atualize os dados do profissional' : 'Novo cadastro'}
+        </Text>
         <Text style={styles.description}>
-          Preencha as informacoes principais do profissional para facilitar a
-          busca dos moradores.
+          Preencha as informacoes principais para facilitar que moradores
+          encontrem e entrem em contato com o profissional.
         </Text>
       </View>
 
@@ -142,13 +175,15 @@ export default function ProfessionalFormScreen({ navigation, route }) {
 
       <View style={styles.actions}>
         <PrimaryButton
-          title={isEditing ? 'Salvar alteracoes' : 'Cadastrar profissional'}
+          title={isSaving ? 'Salvando...' : isEditing ? 'Salvar alteracoes' : 'Cadastrar profissional'}
           onPress={handleSubmit}
+          disabled={isSaving}
         />
         <PrimaryButton
           title="Voltar para a lista"
           variant="secondary"
           onPress={() => navigation.navigate('ProfessionalsList')}
+          disabled={isSaving}
         />
       </View>
     </ScreenContainer>

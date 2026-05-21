@@ -1,18 +1,35 @@
-import { useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import EmptyState from '../components/EmptyState';
 import PrimaryButton from '../components/PrimaryButton';
 import ProfessionalCard from '../components/ProfessionalCard';
 import ScreenContainer from '../components/ScreenContainer';
 import { useProfessionals } from '../hooks/useProfessionals';
 import { theme } from '../styles/theme';
+import { getFirestoreErrorMessage } from '../utils/firestoreErrorMessages';
+import { useState } from 'react';
 
 export default function ProfessionalsListScreen({ navigation }) {
+  const {
+    professionals,
+    deleteProfessional,
+    errorMessage,
+    isLoading,
+    refreshProfessionals,
+  } = useProfessionals();
   const [search, setSearch] = useState('');
-  const { deleteProfessional, professionals } = useProfessionals();
 
+  const normalizedSearch = search.trim().toLowerCase();
+  const showLoadingState = isLoading && professionals.length === 0;
   const filteredProfessionals = professionals.filter((professional) =>
-    professional.profession.toLowerCase().includes(search.trim().toLowerCase())
+    professional.profession.toLowerCase().includes(normalizedSearch)
   );
 
   function handleDelete(professional) {
@@ -27,10 +44,26 @@ export default function ProfessionalsListScreen({ navigation }) {
         {
           text: 'Excluir',
           style: 'destructive',
-          onPress: () => deleteProfessional(professional.id),
+          onPress: async () => {
+            try {
+              await deleteProfessional(professional.id);
+            } catch (error) {
+              Alert.alert(
+                'Erro ao excluir',
+                getFirestoreErrorMessage(
+                  error,
+                  'Nao foi possivel remover o cadastro.'
+                )
+              );
+            }
+          },
         },
       ]
     );
+  }
+
+  function handleEdit(professionalId) {
+    navigation.navigate('ProfessionalForm', { professionalId });
   }
 
   return (
@@ -38,8 +71,8 @@ export default function ProfessionalsListScreen({ navigation }) {
       <View style={styles.header}>
         <Text style={styles.title}>Lista de profissionais</Text>
         <Text style={styles.description}>
-          Consulte trabalhadores do bairro e filtre por profissao para localizar
-          o servico desejado.
+          Consulte os trabalhadores cadastrados no bairro e filtre por
+          profissao para encontrar o servico desejado.
         </Text>
       </View>
 
@@ -51,37 +84,65 @@ export default function ProfessionalsListScreen({ navigation }) {
           placeholderTextColor={theme.colors.textMuted}
           style={styles.searchInput}
         />
-
         <PrimaryButton
           title="Novo cadastro"
-          onPress={() => navigation.navigate('ProfessionalForm')}
+          onPress={() =>
+            navigation.navigate('ProfessionalForm', { professionalId: null })
+          }
         />
       </View>
 
-      <FlatList
-        data={filteredProfessionals}
-        keyExtractor={(item) => item.id}
-        style={styles.list}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <ProfessionalCard
-            professional={item}
-            onEdit={() =>
-              navigation.navigate('ProfessionalForm', {
-                professionalId: item.id,
-              })
-            }
-            onDelete={() => handleDelete(item)}
-          />
-        )}
-        ListEmptyComponent={
-          <EmptyState
-            title="Nenhum profissional encontrado"
-            description="Tente outro termo na busca ou cadastre um novo profissional."
-          />
-        }
-      />
+      <View style={styles.summary}>
+        <Text style={styles.summaryText}>
+          {filteredProfessionals.length} profissional(is) encontrado(s)
+        </Text>
+      </View>
+
+      {errorMessage ? (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorBannerTitle}>Atencao</Text>
+          <Text style={styles.errorBannerText}>{errorMessage}</Text>
+        </View>
+      ) : null}
+
+      {showLoadingState ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Carregando dados do Firestore...</Text>
+        </View>
+      ) : null}
+
+      {!showLoadingState ? (
+        <FlatList
+          data={filteredProfessionals}
+          keyExtractor={(item) => item.id}
+          style={styles.list}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshing={isLoading && professionals.length > 0}
+          onRefresh={refreshProfessionals}
+          renderItem={({ item }) => (
+            <ProfessionalCard
+              professional={item}
+              onEdit={() => handleEdit(item.id)}
+              onDelete={() => handleDelete(item)}
+            />
+          )}
+          ListEmptyComponent={
+            <EmptyState
+              title={
+                errorMessage
+                  ? 'Firebase ainda nao configurado'
+                  : 'Nenhum profissional encontrado'
+              }
+              description={
+                errorMessage ||
+                'Tente outro termo na busca ou cadastre um novo profissional do bairro.'
+              }
+            />
+          }
+        />
+      ) : null}
     </ScreenContainer>
   );
 }
@@ -115,6 +176,47 @@ const styles = StyleSheet.create({
     fontSize: 15,
     minHeight: 52,
     paddingHorizontal: theme.spacing.md,
+  },
+  summary: {
+    backgroundColor: theme.colors.secondarySoft,
+    borderRadius: theme.radius.md,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+  },
+  summaryText: {
+    color: theme.colors.secondary,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  errorBanner: {
+    backgroundColor: '#FEE2E2',
+    borderRadius: theme.radius.md,
+    gap: 4,
+    padding: theme.spacing.md,
+  },
+  errorBannerTitle: {
+    color: theme.colors.danger,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  errorBannerText: {
+    color: theme.colors.danger,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    gap: theme.spacing.md,
+    padding: theme.spacing.xl,
+  },
+  loadingText: {
+    color: theme.colors.textMuted,
+    fontSize: 14,
+    fontWeight: '600',
   },
   list: {
     flex: 1,
