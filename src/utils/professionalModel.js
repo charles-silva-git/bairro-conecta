@@ -10,6 +10,33 @@ export function createInitialProfessionalForm() {
   };
 }
 
+export const initialProfessionals = [
+  {
+    id: '1',
+    name: 'Marcos Silva',
+    profession: 'Eletricista',
+    phone: '(81) 99876-1234',
+    description: 'Instalacoes, manutencao residencial e pequenos reparos.',
+    neighborhood: 'Boa Vista',
+  },
+  {
+    id: '2',
+    name: 'Juliana Costa',
+    profession: 'Manicure',
+    phone: '(81) 98765-4321',
+    description: 'Atendimento em domicilio com horario agendado.',
+    neighborhood: 'Santo Amaro',
+  },
+  {
+    id: '3',
+    name: 'Andre Lima',
+    profession: 'Encanador',
+    phone: '(81) 99123-4567',
+    description: 'Consertos hidraulicos, troca de torneiras e vazamentos.',
+    neighborhood: 'Casa Amarela',
+  },
+];
+
 function normalizeTextValue(value) {
   return value.trim().replace(/\s+/g, ' ');
 }

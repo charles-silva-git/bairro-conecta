@@ -1,36 +1,37 @@
 import { useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 import EmptyState from '../components/EmptyState';
 import PrimaryButton from '../components/PrimaryButton';
 import ProfessionalCard from '../components/ProfessionalCard';
 import ScreenContainer from '../components/ScreenContainer';
+import { useProfessionals } from '../hooks/useProfessionals';
 import { theme } from '../styles/theme';
-
-const previewProfessionals = [
-  {
-    id: '1',
-    name: 'Marcos Silva',
-    profession: 'Eletricista',
-    phone: '(81) 99876-1234',
-    description: 'Instalacoes, manutencao residencial e pequenos reparos.',
-    neighborhood: 'Boa Vista',
-  },
-  {
-    id: '2',
-    name: 'Juliana Costa',
-    profession: 'Manicure',
-    phone: '(81) 98765-4321',
-    description: 'Atendimento em domicilio com horario agendado.',
-    neighborhood: 'Santo Amaro',
-  },
-];
 
 export default function ProfessionalsListScreen({ navigation }) {
   const [search, setSearch] = useState('');
+  const { deleteProfessional, professionals } = useProfessionals();
 
-  const filteredProfessionals = previewProfessionals.filter((professional) =>
+  const filteredProfessionals = professionals.filter((professional) =>
     professional.profession.toLowerCase().includes(search.trim().toLowerCase())
   );
+
+  function handleDelete(professional) {
+    Alert.alert(
+      'Excluir profissional',
+      `Deseja remover ${professional.name} da lista?`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: () => deleteProfessional(professional.id),
+        },
+      ]
+    );
+  }
 
   return (
     <ScreenContainer style={styles.container}>
@@ -66,8 +67,12 @@ export default function ProfessionalsListScreen({ navigation }) {
         renderItem={({ item }) => (
           <ProfessionalCard
             professional={item}
-            onEdit={() => navigation.navigate('ProfessionalForm')}
-            onDelete={() => {}}
+            onEdit={() =>
+              navigation.navigate('ProfessionalForm', {
+                professionalId: item.id,
+              })
+            }
+            onDelete={() => handleDelete(item)}
           />
         )}
         ListEmptyComponent={

@@ -1,9 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native';
 import PrimaryButton from '../components/PrimaryButton';
 import ScreenContainer from '../components/ScreenContainer';
+import { useProfessionals } from '../hooks/useProfessionals';
 import { theme } from '../styles/theme';
 
 export default function HomeScreen({ navigation }) {
+  const { professionals } = useProfessionals();
+
   return (
     <ScreenContainer style={styles.container}>
       <View style={styles.hero}>
@@ -13,6 +16,14 @@ export default function HomeScreen({ navigation }) {
           O BairroConecta aproxima moradores e trabalhadores autonomos com uma
           experiencia simples e acessivel.
         </Text>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Rede local em crescimento</Text>
+        <Text style={styles.cardText}>
+          O app ja possui fluxo local de cadastro, listagem, edicao e exclusao.
+        </Text>
+        <Text style={styles.cardValue}>{professionals.length} profissionais</Text>
       </View>
 
       <View style={styles.actions}>
@@ -63,5 +74,29 @@ const styles = StyleSheet.create({
   },
   actions: {
     gap: theme.spacing.md,
+  },
+  card: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    gap: theme.spacing.xs,
+    padding: theme.spacing.lg,
+  },
+  cardTitle: {
+    color: theme.colors.text,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  cardText: {
+    color: theme.colors.textMuted,
+    fontSize: 14,
+    lineHeight: 21,
+  },
+  cardValue: {
+    color: theme.colors.primary,
+    fontSize: 24,
+    fontWeight: '800',
+    marginTop: theme.spacing.sm,
   },
 });

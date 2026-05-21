@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 import AppInput from '../components/AppInput';
 import PrimaryButton from '../components/PrimaryButton';
 import ScreenContainer from '../components/ScreenContainer';
+import { useProfessionals } from '../hooks/useProfessionals';
 import { theme } from '../styles/theme';
 import {
   createInitialProfessionalForm,
@@ -10,9 +11,40 @@ import {
   validateProfessionalForm,
 } from '../utils/professionalModel';
 
-export default function ProfessionalFormScreen({ navigation }) {
+export default function ProfessionalFormScreen({ navigation, route }) {
+  const professionalId = route.params?.professionalId;
+  const { createProfessional, getProfessionalById, updateProfessional } =
+    useProfessionals();
   const [form, setForm] = useState(createInitialProfessionalForm());
   const [errors, setErrors] = useState({});
+  const isEditing = Boolean(professionalId);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: isEditing ? 'Editar profissional' : 'Cadastrar profissional',
+    });
+  }, [isEditing, navigation]);
+
+  useEffect(() => {
+    if (!professionalId) {
+      setForm(createInitialProfessionalForm());
+      return;
+    }
+
+    const selectedProfessional = getProfessionalById(professionalId);
+
+    if (!selectedProfessional) {
+      return;
+    }
+
+    setForm({
+      name: selectedProfessional.name,
+      profession: selectedProfessional.profession,
+      phone: selectedProfessional.phone,
+      description: selectedProfessional.description,
+      neighborhood: selectedProfessional.neighborhood,
+    });
+  }, [getProfessionalById, professionalId]);
 
   function handleChange(field, value) {
     const nextValue = field === 'phone' ? formatPhoneValue(value) : value;
@@ -38,10 +70,15 @@ export default function ProfessionalFormScreen({ navigation }) {
       return;
     }
 
-    Alert.alert(
-      'Cadastro validado',
-      'O formulario esta pronto para ser conectado a persistencia do app.'
-    );
+    if (isEditing) {
+      updateProfessional(professionalId, form);
+      Alert.alert('Sucesso', 'Cadastro atualizado com sucesso.');
+    } else {
+      createProfessional(form);
+      Alert.alert('Sucesso', 'Profissional cadastrado com sucesso.');
+    }
+
+    navigation.navigate('ProfessionalsList');
   }
 
   return (
@@ -104,7 +141,10 @@ export default function ProfessionalFormScreen({ navigation }) {
       </KeyboardAvoidingView>
 
       <View style={styles.actions}>
-        <PrimaryButton title="Validar cadastro" onPress={handleSubmit} />
+        <PrimaryButton
+          title={isEditing ? 'Salvar alteracoes' : 'Cadastrar profissional'}
+          onPress={handleSubmit}
+        />
         <PrimaryButton
           title="Voltar para a lista"
           variant="secondary"
