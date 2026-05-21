@@ -1,13 +1,31 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { firebaseConfig, isFirebaseConfigured } from './config';
+import {
+  firebaseConfig,
+  isFirebaseConfigured,
+  logFirebaseConfigurationStatus,
+} from './config';
 
-let app = null;
-let db = null;
+let firebaseApp = null;
+let firebaseInitializationError = null;
 
 if (isFirebaseConfigured) {
-  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-  db = getFirestore(app);
+  try {
+    firebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  } catch (error) {
+    firebaseInitializationError = error;
+
+    const isDevelopment =
+      typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
+
+    if (isDevelopment) {
+      console.error('[firebase] Falha ao inicializar o Firebase.', error);
+    }
+  }
+} else {
+  logFirebaseConfigurationStatus();
 }
 
-export { app, db, isFirebaseConfigured };
+export const isFirebaseAvailable =
+  Boolean(firebaseApp) && firebaseInitializationError === null;
+
+export { firebaseApp, firebaseInitializationError };
