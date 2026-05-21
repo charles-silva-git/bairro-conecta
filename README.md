@@ -1,8 +1,12 @@
 # BairroConecta
 
-Aplicativo mobile desenvolvido com React Native e Expo para cadastro e consulta de pequenos empreendedores e prestadores de servico do bairro.
+Aplicativo mobile desenvolvido com React Native, Expo e Firebase Firestore para cadastro e consulta de pequenos empreendedores e prestadores de servico do bairro.
 
 O projeto foi criado com foco em impacto social, ajudando moradores a encontrar servicos proximos com mais facilidade e ampliando a visibilidade de trabalhadores locais como eletricistas, encanadores, diaristas, manicures, pedreiros e outros profissionais autonomos.
+
+## Descricao curta do repositorio
+
+Aplicativo mobile com React Native e Firebase para conectar moradores a profissionais do bairro, com CRUD completo, busca por profissao e foco em impacto social.
 
 ## Objetivo do projeto
 
@@ -34,6 +38,14 @@ Este projeto possui impacto social porque:
 - Firebase Firestore
 - React Hooks
 - Componentizacao
+
+## Status do projeto
+
+- interface principal concluida
+- CRUD completo implementado
+- persistencia remota com Firebase Firestore
+- fallback seguro quando o Firebase nao esta configurado
+- documentacao tecnica e material de entrega prontos
 
 ## Funcionalidades implementadas
 
@@ -105,6 +117,19 @@ O projeto segue uma estrutura simples e escalavel, adequada para ambiente academ
 - `utils/`: validacoes, normalizacao de dados e tratamento de mensagens
 - `constants/`: constantes compartilhadas da aplicacao
 
+## Evolucao do projeto
+
+O historico Git foi reorganizado para refletir uma evolucao realista de desenvolvimento:
+
+1. inicializacao da base com Expo
+2. montagem da navegacao e das telas iniciais
+3. construcao da interface de cadastro e listagem
+4. implementacao do CRUD local em memoria
+5. integracao com Firebase Firestore
+6. refatoracao da camada Firebase com configuracao por ambiente
+7. adicao de fallbacks e tratamento resiliente de erros
+8. consolidacao da documentacao tecnica e de entrega
+
 ## Modelo de dados
 
 Cada profissional cadastrado possui a seguinte estrutura:
@@ -159,13 +184,30 @@ cd bairro-conecta
 npm install
 ```
 
-4. Inicie o projeto:
+4. Crie seu arquivo de ambiente:
+
+```bash
+cp .env.example .env
+```
+
+5. Preencha no `.env` as variaveis do seu projeto Firebase Web:
+
+```bash
+EXPO_PUBLIC_FIREBASE_API_KEY=
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+EXPO_PUBLIC_FIREBASE_APP_ID=
+```
+
+6. Inicie o projeto:
 
 ```bash
 npm start
 ```
 
-5. Para abrir diretamente no Android:
+7. Para abrir diretamente no Android:
 
 ```bash
 npm run android

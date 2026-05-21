@@ -53,7 +53,7 @@ Para entrega academica, existem dois caminhos seguros:
 
 Texto curto sugerido:
 
-Aplicativo mobile desenvolvido com React Native, Expo e Firebase Firestore para cadastro e consulta de pequenos empreendedores e prestadores de servico do bairro, com foco em impacto social e fortalecimento da economia local.
+Aplicativo mobile desenvolvido com React Native, Expo e Firebase Firestore para conectar moradores a profissionais do bairro, com CRUD completo, busca por profissao e foco em impacto social.
 
 ## Topicos sugeridos para o GitHub
 
@@ -76,21 +76,33 @@ Se quiser um nome mais formal:
 
 ## Ordem recomendada de commits
 
-Se voce quiser organizar melhor o historico antes da entrega, uma sequencia boa e:
+O historico final do projeto foi reorganizado nesta sequencia:
 
-1. `chore: initialize Expo project and base structure`
-2. `feat: add navigation and initial screens`
-3. `feat: implement in-memory professional CRUD`
-4. `feat: integrate CRUD with Firebase Firestore`
-5. `chore: add Firestore rules and architecture safeguards`
-6. `docs: add technical README`
-7. `docs: add presentation and delivery materials`
+1. `chore: initialize expo project base`
+2. `feat: add navigation shell and base screens`
+3. `feat: build professionals form and listing ui`
+4. `feat: add local professionals crud flow`
+5. `feat: integrate professionals flow with firestore`
+6. `refactor: harden firebase environment setup`
+7. `feat: add resilient firebase fallback states`
+8. `docs: add project documentation and delivery guides`
+
+## Descricao sugerida para a pagina do GitHub
+
+- `About`:
+  `Aplicativo mobile com React Native e Firebase para conectar moradores a profissionais do bairro, com CRUD completo, busca por profissao e foco em impacto social.`
+
+- `Website`:
+  deixe em branco, a menos que voce publique uma demonstracao externa
+
+- `Topics`:
+  `react-native`, `expo`, `firebase`, `firestore`, `mobile-app`, `social-impact`, `community`, `academic-project`
 
 ## Commit final sugerido para esta etapa
 
 ```bash
 git add README.md docs
-git commit -m "docs: prepare GitHub publication and delivery guide"
+git commit -m "docs: refine repository presentation"
 ```
 
 ## Sequencia recomendada para publicar no GitHub
