@@ -1,6 +1,5 @@
 import {
   addDoc,
-  collection,
   deleteDoc,
   doc,
   getDocs,
@@ -8,28 +7,15 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 
-import { FIRESTORE_COLLECTIONS } from '../constants/firestore';
-import { db, isFirebaseConfigured } from '../firebase/app';
+import { getProfessionalsCollectionRef } from '../firebase';
 
 import {
   buildProfessionalPayload,
   sortProfessionalsByName,
 } from '../utils/professionalModel';
 
-/**
- * Retorna a referência da coleção "professionals"
- */
-function ensureFirebaseConfiguration() {
-  if (!isFirebaseConfigured || !db) {
-    const error = new Error('Configure o Firebase para usar esta funcionalidade.');
-    error.code = 'firebase/configuration-missing';
-    throw error;
-  }
-}
-
 function getProfessionalsCollection() {
-  ensureFirebaseConfiguration();
-  return collection(db, FIRESTORE_COLLECTIONS.PROFESSIONALS);
+  return getProfessionalsCollectionRef();
 }
 
 /**
@@ -60,7 +46,7 @@ export async function fetchProfessionals() {
 }
 
 /**
- * Cria novo profissional no Firestore
+ * Cria novo profissional
  */
 export async function createProfessionalInFirestore(formData) {
   const { id, ...professionalData } = buildProfessionalPayload(formData);
@@ -80,13 +66,19 @@ export async function createProfessionalInFirestore(formData) {
 /**
  * Atualiza profissional existente
  */
-export async function updateProfessionalInFirestore(professionalId, formData) {
+export async function updateProfessionalInFirestore(
+  professionalId,
+  formData
+) {
+  const professionalsCollection = getProfessionalsCollection();
   const { id, ...professionalData } = buildProfessionalPayload(
     formData,
     professionalId
   );
 
-  await updateDoc(doc(getProfessionalsCollection(), professionalId), {
+  const professionalRef = doc(professionalsCollection, professionalId);
+
+  await updateDoc(professionalRef, {
     name: professionalData.name,
     profession: professionalData.profession,
     phone: professionalData.phone,
@@ -105,5 +97,8 @@ export async function updateProfessionalInFirestore(professionalId, formData) {
  * Remove profissional
  */
 export async function deleteProfessionalFromFirestore(professionalId) {
-  await deleteDoc(doc(getProfessionalsCollection(), professionalId));
+  const professionalsCollection = getProfessionalsCollection();
+  const professionalRef = doc(professionalsCollection, professionalId);
+
+  await deleteDoc(professionalRef);
 }
