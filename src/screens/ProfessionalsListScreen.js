@@ -7,13 +7,16 @@ import {
   TextInput,
   View,
 } from 'react-native';
+
 import EmptyState from '../components/EmptyState';
 import PrimaryButton from '../components/PrimaryButton';
 import ProfessionalCard from '../components/ProfessionalCard';
 import ScreenContainer from '../components/ScreenContainer';
+
 import { useProfessionals } from '../hooks/useProfessionals';
 import { theme } from '../styles/theme';
 import { getFirestoreErrorMessage } from '../utils/firestoreErrorMessages';
+
 import { useState } from 'react';
 
 export default function ProfessionalsListScreen({ navigation }) {
@@ -21,15 +24,24 @@ export default function ProfessionalsListScreen({ navigation }) {
     professionals,
     deleteProfessional,
     errorMessage,
+    hasFirebaseConfiguration,
     isLoading,
+    isRefreshing,
     refreshProfessionals,
   } = useProfessionals();
+
   const [search, setSearch] = useState('');
 
   const normalizedSearch = search.trim().toLowerCase();
-  const showLoadingState = isLoading && professionals.length === 0;
-  const filteredProfessionals = professionals.filter((professional) =>
-    professional.profession.toLowerCase().includes(normalizedSearch)
+
+  const showLoadingState =
+    isLoading && professionals.length === 0;
+
+  const filteredProfessionals = professionals.filter(
+    (professional) =>
+      professional.profession
+        .toLowerCase()
+        .includes(normalizedSearch)
   );
 
   function handleDelete(professional) {
@@ -63,16 +75,22 @@ export default function ProfessionalsListScreen({ navigation }) {
   }
 
   function handleEdit(professionalId) {
-    navigation.navigate('ProfessionalForm', { professionalId });
+    navigation.navigate('ProfessionalForm', {
+      professionalId,
+    });
   }
 
   return (
     <ScreenContainer style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Lista de profissionais</Text>
+        <Text style={styles.title}>
+          Lista de profissionais
+        </Text>
+
         <Text style={styles.description}>
-          Consulte os trabalhadores cadastrados no bairro e filtre por
-          profissao para encontrar o servico desejado.
+          Consulte os trabalhadores cadastrados
+          no bairro e filtre por profissao
+          para encontrar o servico desejado.
         </Text>
       </View>
 
@@ -84,31 +102,46 @@ export default function ProfessionalsListScreen({ navigation }) {
           placeholderTextColor={theme.colors.textMuted}
           style={styles.searchInput}
         />
+
         <PrimaryButton
           title="Novo cadastro"
           onPress={() =>
-            navigation.navigate('ProfessionalForm', { professionalId: null })
+            navigation.navigate('ProfessionalForm', {
+              professionalId: null,
+            })
           }
         />
       </View>
 
       <View style={styles.summary}>
         <Text style={styles.summaryText}>
-          {filteredProfessionals.length} profissional(is) encontrado(s)
+          {filteredProfessionals.length}{' '}
+          profissional(is) encontrado(s)
         </Text>
       </View>
 
       {errorMessage ? (
         <View style={styles.errorBanner}>
-          <Text style={styles.errorBannerTitle}>Atencao</Text>
-          <Text style={styles.errorBannerText}>{errorMessage}</Text>
+          <Text style={styles.errorBannerTitle}>
+            Atencao
+          </Text>
+
+          <Text style={styles.errorBannerText}>
+            {errorMessage}
+          </Text>
         </View>
       ) : null}
 
       {showLoadingState ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={styles.loadingText}>Carregando dados do Firestore...</Text>
+          <ActivityIndicator
+            size="large"
+            color={theme.colors.primary}
+          />
+
+          <Text style={styles.loadingText}>
+            Carregando dados do Firestore...
+          </Text>
         </View>
       ) : null}
 
@@ -119,8 +152,8 @@ export default function ProfessionalsListScreen({ navigation }) {
           style={styles.list}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          refreshing={isLoading && professionals.length > 0}
-          onRefresh={refreshProfessionals}
+          refreshing={isRefreshing}
+          onRefresh={() => refreshProfessionals({ pullToRefresh: true })}
           renderItem={({ item }) => (
             <ProfessionalCard
               professional={item}
@@ -131,9 +164,9 @@ export default function ProfessionalsListScreen({ navigation }) {
           ListEmptyComponent={
             <EmptyState
               title={
-                errorMessage
-                  ? 'Firebase ainda nao configurado'
-                  : 'Nenhum profissional encontrado'
+                hasFirebaseConfiguration
+                  ? 'Nenhum profissional encontrado'
+                  : 'Firebase ainda nao configurado'
               }
               description={
                 errorMessage ||
@@ -151,22 +184,27 @@ const styles = StyleSheet.create({
   container: {
     gap: theme.spacing.lg,
   },
+
   header: {
     gap: theme.spacing.xs,
   },
+
   title: {
     color: theme.colors.text,
     fontSize: 28,
     fontWeight: '800',
   },
+
   description: {
     color: theme.colors.textMuted,
     fontSize: 15,
     lineHeight: 22,
   },
+
   toolbar: {
     gap: theme.spacing.md,
   },
+
   searchInput: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
@@ -177,33 +215,39 @@ const styles = StyleSheet.create({
     minHeight: 52,
     paddingHorizontal: theme.spacing.md,
   },
+
   summary: {
     backgroundColor: theme.colors.secondarySoft,
     borderRadius: theme.radius.md,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
   },
+
   summaryText: {
     color: theme.colors.secondary,
     fontSize: 14,
     fontWeight: '700',
   },
+
   errorBanner: {
     backgroundColor: '#FEE2E2',
     borderRadius: theme.radius.md,
     gap: 4,
     padding: theme.spacing.md,
   },
+
   errorBannerTitle: {
     color: theme.colors.danger,
     fontSize: 14,
     fontWeight: '800',
   },
+
   errorBannerText: {
     color: theme.colors.danger,
     fontSize: 13,
     lineHeight: 20,
   },
+
   loadingContainer: {
     alignItems: 'center',
     backgroundColor: theme.colors.surface,
@@ -213,14 +257,17 @@ const styles = StyleSheet.create({
     gap: theme.spacing.md,
     padding: theme.spacing.xl,
   },
+
   loadingText: {
     color: theme.colors.textMuted,
     fontSize: 14,
     fontWeight: '600',
   },
+
   list: {
     flex: 1,
   },
+
   listContent: {
     flexGrow: 1,
     gap: theme.spacing.md,

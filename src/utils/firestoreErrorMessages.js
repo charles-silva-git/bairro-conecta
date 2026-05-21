@@ -1,4 +1,8 @@
 const FIRESTORE_ERROR_MESSAGES = {
+  'firebase/configuration-missing':
+    'Configure o Firebase para usar esta funcionalidade.',
+  'firebase/initialization-failed':
+    'Nao foi possivel inicializar o Firebase. Revise as variaveis do ambiente e reinicie o projeto.',
   'permission-denied':
     'Sem permissao no Firestore. Verifique as regras de seguranca do projeto.',
   unauthenticated:
@@ -11,5 +15,9 @@ const FIRESTORE_ERROR_MESSAGES = {
 export function getFirestoreErrorMessage(error, fallbackMessage) {
   const normalizedCode = error?.code?.replace('firestore/', '');
 
-  return FIRESTORE_ERROR_MESSAGES[normalizedCode] || fallbackMessage;
+  return (
+    FIRESTORE_ERROR_MESSAGES[normalizedCode] ||
+    (typeof error?.message === 'string' && error.message.trim()) ||
+    fallbackMessage
+  );
 }

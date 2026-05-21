@@ -1,4 +1,16 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  firebaseConfigurationMessage,
+  isFirebaseConfigured,
+} from '../firebase';
 import {
   createProfessionalInFirestore,
   deleteProfessionalFromFirestore,
@@ -12,93 +24,160 @@ const ProfessionalsContext = createContext(null);
 
 export function ProfessionalsProvider({ children }) {
   const [professionals, setProfessionals] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  const isMountedRef = useRef(true);
+  const latestRequestIdRef = useRef(0);
+
   useEffect(() => {
-    refreshProfessionals();
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
-  async function refreshProfessionals() {
+  const refreshProfessionals = useCallback(async (options = {}) => {
+    const { pullToRefresh = false } = options;
+    const requestId = latestRequestIdRef.current + 1;
+
+    latestRequestIdRef.current = requestId;
+
+    if (!isFirebaseConfigured) {
+      if (isMountedRef.current) {
+        setProfessionals([]);
+        setErrorMessage(firebaseConfigurationMessage);
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
+
+      return [];
+    }
+
     try {
-      setIsLoading(true);
+      if (isMountedRef.current) {
+        if (pullToRefresh) {
+          setIsRefreshing(true);
+        } else {
+          setIsLoading(true);
+        }
+      }
 
       const loadedProfessionals = await fetchProfessionals();
 
-      setProfessionals(loadedProfessionals);
-      setErrorMessage('');
-    } catch (error) {
-      setErrorMessage(
-        getFirestoreErrorMessage(
-          error,
-          'Nao foi possivel carregar os profissionais do Firestore.'
-        )
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }
+      if (isMountedRef.current && latestRequestIdRef.current === requestId) {
+        setProfessionals(loadedProfessionals);
+        setErrorMessage('');
+      }
 
-  async function createProfessional(formData) {
+      return loadedProfessionals;
+    } catch (error) {
+      if (isMountedRef.current && latestRequestIdRef.current === requestId) {
+        setErrorMessage(
+          getFirestoreErrorMessage(
+            error,
+            'Nao foi possivel carregar os profissionais do Firestore.'
+          )
+        );
+      }
+
+      return [];
+    } finally {
+      if (isMountedRef.current && latestRequestIdRef.current === requestId) {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshProfessionals();
+  }, [refreshProfessionals]);
+
+  const createProfessional = useCallback(async (formData) => {
     const newProfessional = await createProfessionalInFirestore(formData);
 
-    setProfessionals((currentProfessionals) =>
-      sortProfessionalsByName([newProfessional, ...currentProfessionals])
-    );
+    if (isMountedRef.current) {
+      setProfessionals((currentProfessionals) =>
+        sortProfessionalsByName([newProfessional, ...currentProfessionals])
+      );
+      setErrorMessage('');
+    }
 
     return newProfessional;
-  }
+  }, []);
 
-  async function updateProfessional(professionalId, formData) {
+  const updateProfessional = useCallback(async (professionalId, formData) => {
     const updatedProfessional = await updateProfessionalInFirestore(
       professionalId,
       formData
     );
 
-    setProfessionals((currentProfessionals) =>
-      sortProfessionalsByName(
-        currentProfessionals.map((professional) => {
-          if (professional.id !== professionalId) {
-            return professional;
-          }
+    if (isMountedRef.current) {
+      setProfessionals((currentProfessionals) =>
+        sortProfessionalsByName(
+          currentProfessionals.map((professional) => {
+            if (professional.id !== professionalId) {
+              return professional;
+            }
 
-          return updatedProfessional;
-        })
-      )
-    );
+            return updatedProfessional;
+          })
+        )
+      );
+      setErrorMessage('');
+    }
 
     return updatedProfessional;
-  }
+  }, []);
 
-  async function deleteProfessional(professionalId) {
+  const deleteProfessional = useCallback(async (professionalId) => {
     await deleteProfessionalFromFirestore(professionalId);
 
-    setProfessionals((currentProfessionals) =>
-      currentProfessionals.filter(
-        (professional) => professional.id !== professionalId
-      )
-    );
-  }
+    if (isMountedRef.current) {
+      setProfessionals((currentProfessionals) =>
+        currentProfessionals.filter(
+          (professional) => professional.id !== professionalId
+        )
+      );
+      setErrorMessage('');
+    }
+  }, []);
 
-  function getProfessionalById(professionalId) {
-    return professionals.find(
-      (professional) => professional.id === professionalId
-    );
-  }
+  const getProfessionalById = useCallback(
+    (professionalId) =>
+      professionals.find((professional) => professional.id === professionalId),
+    [professionals]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      professionals,
+      isLoading,
+      isRefreshing,
+      errorMessage,
+      hasFirebaseConfiguration: isFirebaseConfigured,
+      refreshProfessionals,
+      createProfessional,
+      updateProfessional,
+      deleteProfessional,
+      getProfessionalById,
+    }),
+    [
+      createProfessional,
+      deleteProfessional,
+      errorMessage,
+      getProfessionalById,
+      isLoading,
+      isRefreshing,
+      professionals,
+      refreshProfessionals,
+      updateProfessional,
+    ]
+  );
 
   return (
-    <ProfessionalsContext.Provider
-      value={{
-        professionals,
-        isLoading,
-        errorMessage,
-        refreshProfessionals,
-        createProfessional,
-        updateProfessional,
-        deleteProfessional,
-        getProfessionalById,
-      }}
-    >
+    <ProfessionalsContext.Provider value={contextValue}>
       {children}
     </ProfessionalsContext.Provider>
   );
