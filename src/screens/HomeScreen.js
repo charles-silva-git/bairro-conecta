@@ -15,7 +15,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <ScreenContainer style={styles.container}>
       <View style={styles.hero}>
-        <Text style={styles.badge}>Servicos locais e comunidade</Text>
+        <Text style={styles.badge}>Serviços Locais da Comunidade</Text>
         <Text style={styles.title}>
           Encontre profissionais do seu bairro com mais praticidade.
         </Text>
@@ -49,19 +49,19 @@ export default function HomeScreen({ navigation }) {
         </View>
       </View>
 
-      <View style={styles.actions}>
-        <PrimaryButton
-          title="Ver lista de profissionais"
-          onPress={() => navigation.navigate('ProfessionalsList')}
-        />
-        <PrimaryButton
-          title="Cadastrar novo profissional"
-          variant="secondary"
-          onPress={() =>
-            navigation.navigate('ProfessionalForm', { professionalId: null })
-          }
-        />
-      </View>
+   <View style={styles.actions}>
+  <PrimaryButton
+    title="Ver lista de profissionais"
+    onPress={() => navigation.navigate('ProfessionalsList')}
+  />
+  <PrimaryButton
+    title="Cadastrar novo profissional"
+    variant="secondary"
+    onPress={() =>
+      navigation.navigate('ProfessionalForm', { professionalId: null })
+    }
+  />
+</View>
     </ScreenContainer>
   );
 }
