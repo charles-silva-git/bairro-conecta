@@ -24,7 +24,9 @@ export default function ProfessionalsListScreen({ navigation }) {
     professionals,
     deleteProfessional,
     errorMessage,
+    hasFirebaseConfiguration,
     isLoading,
+    isRefreshing,
     refreshProfessionals,
   } = useProfessionals();
 
@@ -150,10 +152,8 @@ export default function ProfessionalsListScreen({ navigation }) {
           style={styles.list}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          refreshing={
-            isLoading && professionals.length > 0
-          }
-          onRefresh={refreshProfessionals}
+          refreshing={isRefreshing}
+          onRefresh={() => refreshProfessionals({ pullToRefresh: true })}
           renderItem={({ item }) => (
             <ProfessionalCard
               professional={item}
@@ -163,7 +163,11 @@ export default function ProfessionalsListScreen({ navigation }) {
           )}
           ListEmptyComponent={
             <EmptyState
-              title="Nenhum profissional encontrado"
+              title={
+                hasFirebaseConfiguration
+                  ? 'Nenhum profissional encontrado'
+                  : 'Firebase ainda nao configurado'
+              }
               description={
                 errorMessage ||
                 'Tente outro termo na busca ou cadastre um novo profissional do bairro.'

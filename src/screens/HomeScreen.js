@@ -5,7 +5,12 @@ import { useProfessionals } from '../hooks/useProfessionals';
 import { theme } from '../styles/theme';
 
 export default function HomeScreen({ navigation }) {
-  const { professionals, errorMessage, isLoading } = useProfessionals();
+  const {
+    professionals,
+    errorMessage,
+    hasFirebaseConfiguration,
+    isLoading,
+  } = useProfessionals();
 
   return (
     <ScreenContainer style={styles.container}>
@@ -23,8 +28,8 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.infoCard}>
         <Text style={styles.infoTitle}>Rede local em destaque</Text>
         <Text style={styles.infoText}>
-          {errorMessage
-            ? 'O app ja esta preparado para o Firestore, mas ainda precisa da configuracao real do projeto Firebase.'
+          {!hasFirebaseConfiguration
+            ? 'O app abre normalmente sem Firebase, mas os dados remotos so ficam disponiveis depois da configuracao do ambiente.'
             : 'Os dados agora sao carregados e persistidos no Firebase Firestore.'}
         </Text>
         {errorMessage ? (

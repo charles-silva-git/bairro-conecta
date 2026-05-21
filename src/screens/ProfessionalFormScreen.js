@@ -17,6 +17,7 @@ export default function ProfessionalFormScreen({ navigation, route }) {
   const {
     createProfessional,
     getProfessionalById,
+    hasFirebaseConfiguration,
     isLoading,
     updateProfessional,
   } = useProfessionals();
@@ -36,6 +37,10 @@ export default function ProfessionalFormScreen({ navigation, route }) {
   useEffect(() => {
     if (!professionalId) {
       setForm(createInitialProfessionalForm());
+      return;
+    }
+
+    if (!hasFirebaseConfiguration) {
       return;
     }
 
@@ -61,7 +66,13 @@ export default function ProfessionalFormScreen({ navigation, route }) {
       description: selectedProfessional.description,
       neighborhood: selectedProfessional.neighborhood,
     });
-  }, [getProfessionalById, isLoading, navigation, professionalId]);
+  }, [
+    getProfessionalById,
+    hasFirebaseConfiguration,
+    isLoading,
+    navigation,
+    professionalId,
+  ]);
 
   function handleChange(field, value) {
     const nextValue = field === 'phone' ? formatPhoneValue(value) : value;
@@ -122,6 +133,11 @@ export default function ProfessionalFormScreen({ navigation, route }) {
           Preencha as informacoes principais para facilitar que moradores
           encontrem e entrem em contato com o profissional.
         </Text>
+        {!hasFirebaseConfiguration ? (
+          <Text style={styles.warningText}>
+            Configure o Firebase antes de salvar ou editar cadastros.
+          </Text>
+        ) : null}
       </View>
 
       <KeyboardAvoidingView
@@ -177,7 +193,7 @@ export default function ProfessionalFormScreen({ navigation, route }) {
         <PrimaryButton
           title={isSaving ? 'Salvando...' : isEditing ? 'Salvar alteracoes' : 'Cadastrar profissional'}
           onPress={handleSubmit}
-          disabled={isSaving}
+          disabled={isSaving || !hasFirebaseConfiguration}
         />
         <PrimaryButton
           title="Voltar para a lista"
@@ -204,6 +220,12 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: 15,
     lineHeight: 22,
+  },
+  warningText: {
+    color: theme.colors.danger,
+    fontSize: 13,
+    fontWeight: '600',
+    lineHeight: 20,
   },
   form: {
     gap: theme.spacing.md,
