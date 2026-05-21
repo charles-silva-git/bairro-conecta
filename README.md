@@ -51,6 +51,7 @@ Este projeto possui impacto social porque:
 
 ```text
 bairro-conecta/
+├── .env.example
 ├── App.js
 ├── app.json
 ├── firebase.json
@@ -68,7 +69,11 @@ bairro-conecta/
     │   └── firestore.js
     ├── firebase/
     │   ├── app.js
-    │   └── config.js
+    │   ├── auth.js
+    │   ├── config.js
+    │   ├── firestore.js
+    │   ├── index.js
+    │   └── storage.js
     ├── hooks/
     │   └── useProfessionals.js
     ├── routes/
@@ -176,12 +181,12 @@ Caso voce esteja configurando o projeto em outro ambiente, revise o arquivo:
 src/firebase/config.js
 ```
 
-Esse arquivo e publicado com placeholders para evitar expor um Firebase real no repositório. Para executar o app com persistencia, preencha `src/firebase/config.js` com as credenciais do seu projeto Firebase Web.
+Esse arquivo centraliza a leitura e validacao das variaveis de ambiente do Firebase.
 
-Como referencia, o projeto tambem possui:
+Para executar o app com persistencia, crie um arquivo `.env` na raiz com base em:
 
 ```text
-src/firebase/config.example.js
+.env.example
 ```
 
 ## Como configurar o Firestore
@@ -189,8 +194,14 @@ src/firebase/config.example.js
 1. Crie um projeto no Firebase Console.
 2. Ative o Firestore Database.
 3. Adicione um aplicativo Web ao projeto.
-4. Copie a configuracao do Firebase para `src/firebase/config.js`.
+4. Copie a configuracao do Firebase para o arquivo `.env`.
 5. Publique as regras do Firestore.
+
+Exemplo:
+
+```bash
+cp .env.example .env
+```
 
 Se estiver usando Firebase CLI, execute:
 

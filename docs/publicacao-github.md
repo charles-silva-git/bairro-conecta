@@ -42,7 +42,7 @@ bairro-conecta/
 
 ## Observacao importante sobre Firebase
 
-O arquivo `src/firebase/config.js` usa configuracao de um projeto Firebase Web. Tecnicamente esses dados nao funcionam como senha privada, mas publicar um repositorio com regras permissivas de escrita ou exclusao pode gerar uso indevido do banco.
+O projeto usa `src/firebase/config.js` apenas para ler e validar as variaveis do Firebase. Os valores reais devem ficar em um arquivo `.env`, que nao deve ser publicado.
 
 Para entrega academica, existem dois caminhos seguros:
 
