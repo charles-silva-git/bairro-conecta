@@ -130,7 +130,7 @@ export default function ProfessionalFormScreen({ navigation, route }) {
           {isEditing ? 'Atualize os dados do profissional' : 'Novo cadastro'}
         </Text>
         <Text style={styles.description}>
-          Preencha as informacoes principais para facilitar que moradores
+          Preencha as informações principais para facilitar que moradores
           encontrem e entrem em contato com o profissional.
         </Text>
         {!hasFirebaseConfiguration ? (
@@ -171,7 +171,7 @@ export default function ProfessionalFormScreen({ navigation, route }) {
 
           <AppInput
             label="Descricao"
-            placeholder="Descreva os servicos oferecidos"
+            placeholder="Descreva os serviços oferecidos"
             value={form.description}
             onChangeText={(value) => handleChange('description', value)}
             multiline

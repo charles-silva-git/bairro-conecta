@@ -6,6 +6,6 @@ export const PROFESSIONAL_FIELD_LIMITS = {
   name: 80,
   profession: 60,
   phoneDigits: 11,
-  description: 280,
+  description: 1000,
   neighborhood: 60,
 };
