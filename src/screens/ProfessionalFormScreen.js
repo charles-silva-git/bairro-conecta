@@ -1,4 +1,5 @@
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { BackToHomeButton } from '../components/BackToHomeButton';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import AppInput from '../components/AppInput';
 import PrimaryButton from '../components/PrimaryButton';
@@ -195,12 +196,15 @@ export default function ProfessionalFormScreen({ navigation, route }) {
           onPress={handleSubmit}
           disabled={isSaving || !hasFirebaseConfiguration}
         />
+
         <PrimaryButton
           title="Voltar para a lista"
           variant="secondary"
           onPress={() => navigation.navigate('ProfessionalsList')}
           disabled={isSaving}
         />
+
+        <BackToHomeButton />
       </View>
     </ScreenContainer>
   );

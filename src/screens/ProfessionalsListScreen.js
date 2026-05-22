@@ -7,7 +7,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-
+import { BackToHomeButton } from '../components/BackToHomeButton';
 import EmptyState from '../components/EmptyState';
 import PrimaryButton from '../components/PrimaryButton';
 import ProfessionalCard from '../components/ProfessionalCard';
@@ -176,6 +176,8 @@ export default function ProfessionalsListScreen({ navigation }) {
           }
         />
       ) : null}
+
+      <BackToHomeButton />
     </ScreenContainer>
   );
 }
