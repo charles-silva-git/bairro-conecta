@@ -300,12 +300,7 @@ Atualmente o projeto ainda nao possui autenticacao com Firebase Auth. Por isso, 
 - testes automatizados
 - tela de detalhes do profissional
 
-## Documentacao complementar
 
-- `docs/apresentacao-final.md`: roteiro para slides e defesa oral
-- `docs/roteiro-video.md`: roteiro para gravacao do video
-- `docs/checklist-apresentacao.md`: checklist para demonstracao
-- `docs/publicacao-github.md`: guia de organizacao da entrega e publicacao no GitHub
 
 ## Autor
 
